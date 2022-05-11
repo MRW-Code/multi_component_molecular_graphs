@@ -1,11 +1,22 @@
 from src.utils import args
-import pandas as pd
-from src.processing import get_useful_columns
+from src.dataset import MultiCompSolDataset
+from dgl.dataloading import GraphDataLoader
+from src.model import GCN
+import pytorch_lightning as pl
 
 if __name__ == '__main__':
-    # Load the literature dataset and drop all the descriptor columns
-    lit_d_set = get_useful_columns('./data/dataset_vas_et_al.csv')
+    dataloader = GraphDataLoader(MultiCompSolDataset(), batch_size=64, shuffle=True)
 
+    test = next(iter(dataloader))
+    print('done')
+
+
+    model = GCN(in_featA=100, in_featB=100, n_hidden=10)
+    trainer = pl.Trainer()
+    trainer.fit(model, dataloader)
+
+
+    # train_featuresA, train_featuresB, train_labels = next(iter(dls))
     # Convert the SMILES codes into molcular graphs
 
 

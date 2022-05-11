@@ -6,6 +6,12 @@ from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 import dgl.nn.pytorch as dglnn
 
+
+
+
+
+
+
 class GCN(pl.LightningModule):
     def __init__(self, in_featA, in_featB, n_hidden):
         super().__init__()
@@ -17,8 +23,8 @@ class GCN(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         graphA, graphB, label = batch
 
-        feat_vec_a = torch.zeros([graphA.num_nodes(), self.n_hidden], dtype=torch.float)
-        feat_vec_b = torch.zeros([graphB.num_nodes(), self.n_hidden], dtype=torch.float)
+        feat_vec_a = torch.FloatTensor([graphA.num_nodes(), self.n_hidden])
+        feat_vec_b = torch.FloatTensor([graphB.num_nodes(), self.n_hidden])
 
         h = self.conv1(graphA, feat_vec_a)
         i = self.conv2(graphB, feat_vec_b)

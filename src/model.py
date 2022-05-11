@@ -1,4 +1,6 @@
 import os
+
+import dgl
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -7,30 +9,32 @@ import pytorch_lightning as pl
 import dgl.nn.pytorch as dglnn
 
 
-
-
-
-
-
 class GCN(pl.LightningModule):
     def __init__(self, in_featA, in_featB, n_hidden):
         super().__init__()
-        self.conv1 = dglnn.GraphConv(in_featA, n_hidden, activation='relu')
-        self.conv2 = dglnn.GraphConv(in_featB, n_hidden, activation='relu')
+        self.conv1 = dglnn.GraphConv(in_featA, n_hidden)
+        self.conv2 = dglnn.GraphConv(in_featB, n_hidden)
+
+        self.flatten = nn.Linear(20, 20)
+
         self.final = nn.Linear(n_hidden*2, 1)
         self.n_hidden = n_hidden
 
     def training_step(self, batch, batch_idx):
         graphA, graphB, label = batch
+        graphA = dgl.add_self_loop(graphA)
+        graphB = dgl.add_self_loop(graphB)
 
-        feat_vec_a = torch.FloatTensor([graphA.num_nodes(), self.n_hidden])
-        feat_vec_b = torch.FloatTensor([graphB.num_nodes(), self.n_hidden])
+        feat_vec_a = torch.zeros([graphA.num_nodes(), self.n_hidden], dtype=torch.float)
+        feat_vec_b = torch.zeros([graphB.num_nodes(), self.n_hidden], dtype=torch.float)
+
+
 
         h = self.conv1(graphA, feat_vec_a)
         i = self.conv2(graphB, feat_vec_b)
 
-
-        j = torch.concat([h, i],axis=1)
+        # this is wrong time for multihead attention!!!
+        j = torch.concat((h, i),axis=1)
         pred = self.final(j)
 
         loss = F.mse_loss(pred, label)

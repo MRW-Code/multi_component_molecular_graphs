@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 
 
 if __name__ == '__main__':
-    dataloader = GraphDataLoader(MultiCompSolDataset(), batch_size=64, shuffle=False)
+    dataloader = GraphDataLoader(MultiCompSolDataset(), batch_size=64, shuffle=True)
 
     test = next(iter(dataloader))
     print('done')

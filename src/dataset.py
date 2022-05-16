@@ -6,6 +6,8 @@ from rdkit.Chem import MolFromSmiles
 from rdkit import Chem
 from dgllife.utils import smiles_to_bigraph
 import pytorch_lightning as pl
+import dgl
+from torch_geometric.utils import from_networkx
 
 class MultiCompSolDataset(Dataset):
     def __init__(self, transforms=None, target_transforms=None):
@@ -36,7 +38,16 @@ class MultiCompSolDataset(Dataset):
         smilesA, smilesB, label = self.df.loc[idx, :].values
         graphA = smiles_to_bigraph(smilesA, node_featurizer=self.featurize_atoms,
                               edge_featurizer = self.featurize_bonds)
+        graphA = dgl.add_self_loop(graphA)
+        # graphA = dgl.to_networkx(graphA)
+        # graphA = from_networkx(graphA)
+
+
         graphB = smiles_to_bigraph(smilesB, node_featurizer=self.featurize_atoms,
                                    edge_featurizer=self.featurize_bonds)
+        graphB = dgl.add_self_loop(graphB)
+        # graphB = dgl.to_networkx(graphB)
+        # graphB = from_networkx(graphB)
+
         return graphA, graphB, label
 

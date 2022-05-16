@@ -1,21 +1,17 @@
 from src.utils import args
-from src.dataset import MultiCompSolDataset
+from src.dataset import MultiCompSolDataset , MultiCompSolDatasetv2
 from dgl.dataloading import GraphDataLoader
 from src.model import *
 import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
+from dgl.data import DGLDataset
+from dgl.dataloading import batch_graphs
 
 if __name__ == '__main__':
-    # dataset = MultiCompSolDataset()
-    dataset = dgl.data.GINDataset('MUTAG', False)
-
-    # dataloader = DataLoader(dataset, batch_size=10, shuffle=True)
-    # for data in dataloader:
-    #     print(data)
-
+    dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 
-    model = Classifier(7, 20)
+    model = GATNet_1(1)
     opt = torch.optim.Adam(model.parameters())
 
     epochs = 10
@@ -25,9 +21,10 @@ if __name__ == '__main__':
         running_loss = 0.0
 
         for batch_id, batch_data in enumerate(dataloader):
-            batched_graph, labels = batch_data
-            feats = batched_graph.ndata['attr']
-            logits = model(batched_graph, feats)
+            batched_graphA, batched_graphB, labels = batch_data
+
+            feats = batched_graphA.ndata['atomic']
+            logits = model(batched_graphA, feats)
             loss = F.cross_entropy(logits, labels)
             opt.zero_grad()
             loss.backward()

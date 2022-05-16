@@ -91,18 +91,41 @@ class Classifier(nn.Module):
         super(Classifier, self).__init__()
         self.conv1 = dglnn.GraphConv(in_dim, hidden_dim)
         self.conv2 = dglnn.GraphConv(hidden_dim, hidden_dim)
-        self.classify = nn.Linear(hidden_dim, 5)
+        self.classify = nn.Linear(hidden_dim, 1)
 
     def forward(self, g, h):
         # Apply graph convolution and activation.
         h = F.relu(self.conv1(g, h))
         h = F.relu(self.conv2(g, h))
-        with g.local_scope():
-            g.ndata['h'] = h
-            # Calculate graph representation by average readout.
-            hg = dgl.mean_nodes(g, 'h')
-            return self.classify(hg)
+        h = self.classify(h)
+        # with g.local_scope():
+        #     g.ndata['h'] = h
+        #     # Calculate graph representation by average readout.
+        #     hg = dgl.mean_nodes(g, 'h')
+        #     return self.classify(hg)
+        return h
 
+class GATNet_1(nn.Module):
+    def __init__(self, n_feats):
+        super(GATNet_1, self).__init__()
+
+        self.embedding_size = 1024
+
+        # Layers
+        self.gat1A = dglnn.GATConv(n_feats, self.embedding_size, num_heads=3)
+        self.linear1A = nn.Linear(self.embedding_size*3, self.embedding_size)
+        self.output1A = nn.Linear(self.embedding_size, n_feats)
+
+        # self.gat1B = dglnn.GATConv(n_feats, embedding_size, 1)
+        # self.linear1A = nn.Linear(embedding_size * n_feats, embedding_size)
+        # self.output1B = nn.Linear(embedding_size, 1)
+
+    def forward(self, bg, feats):
+        x = self.gat1A(bg, feats)
+        x = x.flatten(1)
+        x = self.linear1A(x)
+        x = self.output1A(x)
+        return x
 
 
 

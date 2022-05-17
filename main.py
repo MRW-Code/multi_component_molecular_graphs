@@ -6,39 +6,36 @@ import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
 from dgl.data import DGLDataset
 from dgl.dataloading import batch_graphs
+from tqdm import tqdm
+import numpy as np
 
 if __name__ == '__main__':
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 
     model = GATNet_1(1)
-    opt = torch.optim.Adam(model.parameters())
-
+    opt = torch.optim.Adam(model.parameters(), lr=0.01)
     epochs = 10
 
-
     for epoch in range(epochs):
-        running_loss = 0.0
-
+        ls = []
         for batch_id, batch_data in enumerate(dataloader):
             batched_graphA, batched_graphB, labels = batch_data
 
             feats = batched_graphA.ndata['atomic']
             logits = model(batched_graphA, feats)
-            loss = F.cross_entropy(logits, labels)
+            loss = F.mse_loss(logits, labels)
+            ls.append(loss.item())
+
             opt.zero_grad()
             loss.backward()
             opt.step()
 
-            running_loss += loss.item()
-            print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')
-            running_loss = 0.0
+        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}')
 
-
-
-        print('done')
-
-    print('done')
+            # running_loss += loss.item()
+            # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')
+            # running_loss = 0.0
 
 
     # model = GCN(in_featA=20, in_featB=20, n_hidden=20)

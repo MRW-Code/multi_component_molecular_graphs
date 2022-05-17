@@ -114,18 +114,18 @@ class GATNet_1(nn.Module):
         # Layers
         self.gat1A = dglnn.GATConv(n_feats, self.embedding_size, num_heads=3)
         self.linear1A = nn.Linear(self.embedding_size*3, self.embedding_size)
-        self.output1A = nn.Linear(self.embedding_size, n_feats)
-
-        # self.gat1B = dglnn.GATConv(n_feats, embedding_size, 1)
-        # self.linear1A = nn.Linear(embedding_size * n_feats, embedding_size)
-        # self.output1B = nn.Linear(embedding_size, 1)
+        self.output1A = nn.Linear(self.embedding_size, 1)
+        self.relu = nn.LeakyReLU(True)
+        self.pooling = dglnn.AvgPooling()
 
     def forward(self, bg, feats):
         x = self.gat1A(bg, feats)
         x = x.flatten(1)
         x = self.linear1A(x)
+        x = self.relu(x)
+        x = self.pooling(bg, x)
         x = self.output1A(x)
-        return x
+        return x.double()
 
 
 

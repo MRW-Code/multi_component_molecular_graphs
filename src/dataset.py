@@ -94,7 +94,7 @@ class MultiCompSolDatasetv2(dgl.data.DGLDataset):
 
             # Get labels
             self.labels.append(label)
-        self.labels = torch.LongTensor(self.labels)
+        # self.labels = torch.LongTensor(self.labels)
 
     def __getitem__(self, i):
         return self.graphsA[i], self.graphsB[i], self.labels[i]

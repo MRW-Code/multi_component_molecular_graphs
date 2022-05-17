@@ -10,7 +10,7 @@ from tqdm import tqdm
 import numpy as np
 import torch.nn.functional as F
 import torch
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 
 if __name__ == '__main__':
     print(device)
@@ -48,8 +48,9 @@ if __name__ == '__main__':
             r2 = r2_score(labels, logits)
             mse = mean_squared_error(labels, logits)
             mae = mean_absolute_error(labels, logits)
+            mape = mean_absolute_percentage_error(labels, logits)
 
-        tqdm.write(f'Epoch {epoch}, Loss = {np.mean(ls)}, r2 = {r2}, mse = {mse}, mae = {mae}')
+        tqdm.write(f'Epoch {epoch}, Loss={np.mean(ls)}, r2={r2}, mse={mse}, mae={mae}, mape={mape}')
 
             # running_loss += loss.item()
             # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')

@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = GATNet_1(1)
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
-    epochs = 20
+    epochs = 100
     model.to(device)
     for epoch in range(epochs):
         ls = []

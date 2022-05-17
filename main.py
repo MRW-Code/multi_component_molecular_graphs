@@ -12,6 +12,7 @@ import torch.nn.functional as F
 import torch
 
 if __name__ == '__main__':
+    print(device)
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 

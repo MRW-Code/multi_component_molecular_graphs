@@ -10,6 +10,7 @@ from tqdm import tqdm
 import numpy as np
 import torch.nn.functional as F
 import torch
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 
 if __name__ == '__main__':
     print(device)
@@ -36,7 +37,16 @@ if __name__ == '__main__':
             loss.backward()
             opt.step()
 
-        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}, \tLen = {len(ls)}')
+            # metrics
+            if device == 'cuda':
+                labels = labels.detach().numpy()
+                logits = logits.detach().numpy()
+
+            r2 = r2_score(labels, logits)
+            mse = mean_squared_error(labels, logits)
+            mae = mean_absolute_error(labels, logits)
+
+        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}, \tr2 = {r2}, \tmse = {mse}, \tmae = {mae}')
 
             # running_loss += loss.item()
             # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')

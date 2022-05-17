@@ -50,7 +50,7 @@ if __name__ == '__main__':
             mae = mean_absolute_error(labels, logits)
             mape = mean_absolute_percentage_error(labels, logits)
 
-        tqdm.write(f'Epoch {epoch}, Loss={np.mean(ls)}, r2={r2}, mse={mse}, mae={mae}, mape={mape}')
+        tqdm.write(f'Epoch {epoch:.3f}, Loss={np.mean(ls):.3f}, r2={r2:.3f}, mse={mse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
 
             # running_loss += loss.item()
             # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')

@@ -1,4 +1,4 @@
-from src.utils import args
+from src.utils import args, device
 from src.dataset import MultiCompSolDatasetv2
 from dgl.dataloading import GraphDataLoader
 from src.model import GATNet_1
@@ -16,14 +16,20 @@ if __name__ == '__main__':
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 
     model = GATNet_1(1)
+    model.to(device)
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 20
 
     for epoch in range(epochs):
         ls = []
         for batch_id, batch_data in enumerate(dataloader):
+            batch_data
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
+
+            batched_graphA.to(device)
+            batched_graphB.to(device)
+            labels.to(device)
 
             feats = batched_graphA.ndata['atomic']
             logits = model(batched_graphA, feats)

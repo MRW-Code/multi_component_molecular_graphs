@@ -41,7 +41,7 @@ class MultiCompSolDatasetv2(dgl.data.DGLDataset):
             graphA = smiles_to_bigraph(smilesA, node_featurizer=self.featurize_atoms,
                                        edge_featurizer=self.featurize_bonds)
             graphA = dgl.add_self_loop(graphA)
-            self.graphsA.append(graphA)
+            self.graphsA.append(graphA.to('cuda'))
 
             # Make list of graph B
             graphB = smiles_to_bigraph(smilesB, node_featurizer=self.featurize_atoms,

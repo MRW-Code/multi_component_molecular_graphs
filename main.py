@@ -36,7 +36,7 @@ if __name__ == '__main__':
             loss.backward()
             opt.step()
 
-        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}')
+        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}, \tLen = {len(ls)}')
 
             # running_loss += loss.item()
             # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')

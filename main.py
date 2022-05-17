@@ -15,12 +15,12 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 if __name__ == '__main__':
     print(device)
     dataset = MultiCompSolDatasetv2()
-    dataloader = GraphDataLoader(dataset, batch_size=128, shuffle=False)
+    dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=False)
 
     model = GATNet_1(1)
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
-    epochs = 1000
+    epochs = 500
     model.to(device)
     for epoch in range(epochs):
         ls = []
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             mse = mean_squared_error(labels, logits)
             mae = mean_absolute_error(labels, logits)
 
-        tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}, \tr2 = {r2}, \tmse = {mse}, \tmae = {mae}')
+        tqdm.write(f'Epoch {epoch}, Loss = {np.mean(ls)}, r2 = {r2}, mse = {mse}, mae = {mae}')
 
             # running_loss += loss.item()
             # print(f'[{epoch + 1}, {epoch + 1:5d}] loss: {running_loss / 1:.3f}')

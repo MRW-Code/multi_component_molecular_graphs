@@ -30,7 +30,11 @@ if __name__ == '__main__':
             batched_graphB.to(device)
             labels.to(device)
 
+            print(batched_graphA.device, batched_graphB.device, labels.device)
+
             feats = batched_graphA.ndata['atomic']
+
+            print(feats.device)
             logits = model(batched_graphA, feats)
             loss = F.mse_loss(logits, labels)
             ls.append(loss.item())

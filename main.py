@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
             # metrics
             if device == 'cuda':
-                labels = labels.detach().cpu().numpy()
+                labels = labels.cpu()
                 logits = logits.detach().cpu().numpy()
             else:
                 labels = labels.detach().numpy()

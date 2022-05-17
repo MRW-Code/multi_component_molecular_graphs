@@ -27,7 +27,7 @@ if __name__ == '__main__':
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
 
-            batched_graphA.to(device)
+            batched_graphA.to('cuda')
             batched_graphB.to(device)
             labels.to(device)
 

@@ -38,8 +38,8 @@ if __name__ == '__main__':
             opt.step()
 
             # metrics
-            if device == 'cuda':
-                labels = labels.cpu()
+            if torch.cuda.is_available():
+                labels = labels.detach().cpu().numpy()
                 logits = logits.detach().cpu().numpy()
             else:
                 labels = labels.detach().numpy()

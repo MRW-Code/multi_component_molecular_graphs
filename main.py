@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 20
-    model.to('cuda')
+    model.to(device)
     for epoch in range(epochs):
         ls = []
         for batch_id, batch_data in enumerate(dataloader):
@@ -27,11 +27,11 @@ if __name__ == '__main__':
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
 
-            batched_graphA.to('cuda')
-            batched_graphB.to('cuda')
-            labels.to('cuda')
+            batched_graphA.to(device)
+            batched_graphB.to(device)
+            labels.to(device)
 
-            feats = batched_graphA.ndata['atomic']
+            feats = batched_graphA.ndata['atomic'].to(device)
             logits = model(batched_graphA, feats)
             loss = F.mse_loss(logits, labels)
             ls.append(loss.item())

@@ -16,10 +16,10 @@ if __name__ == '__main__':
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 
     model = GATNet_1(1)
-    model.to(device)
+
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 20
-
+    model.to('cuda')
     for epoch in range(epochs):
         ls = []
         for batch_id, batch_data in enumerate(dataloader):
@@ -27,9 +27,9 @@ if __name__ == '__main__':
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
 
-            batched_graphA.to(device)
-            batched_graphB.to(device)
-            labels.to(device)
+            batched_graphA.to('cuda')
+            batched_graphB.to('cuda')
+            labels.to('cuda')
 
             feats = batched_graphA.ndata['atomic']
             logits = model(batched_graphA, feats)

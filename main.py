@@ -26,16 +26,11 @@ if __name__ == '__main__':
         for batch_id, batch_data in enumerate(dataloader):
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
-
-            batched_graphA.to('cuda')
-            batched_graphB.to(device)
-            labels.to(device)
-
             print(batched_graphA.device, batched_graphB.device, labels.device)
 
             feats = batched_graphA.ndata['atomic']
-
             print(feats.device)
+
             logits = model(batched_graphA, feats)
             loss = F.mse_loss(logits, labels)
             ls.append(loss.item())

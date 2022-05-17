@@ -1,3 +1,4 @@
+from src.utils import args, device
 import torch
 from torch.utils.data import Dataset
 from src.processing import get_useful_columns
@@ -41,16 +42,16 @@ class MultiCompSolDatasetv2(dgl.data.DGLDataset):
             graphA = smiles_to_bigraph(smilesA, node_featurizer=self.featurize_atoms,
                                        edge_featurizer=self.featurize_bonds)
             graphA = dgl.add_self_loop(graphA)
-            self.graphsA.append(graphA.to('cuda'))
+            self.graphsA.append(graphA.to(device))
 
             # Make list of graph B
             graphB = smiles_to_bigraph(smilesB, node_featurizer=self.featurize_atoms,
                                        edge_featurizer=self.featurize_bonds)
             graphB = dgl.add_self_loop(graphB)
-            self.graphsB.append(graphB)
+            self.graphsB.append(graphB.to(device))
 
             # Get labels
-            self.labels.append(label)
+            self.labels.append(label.to(device))
 
     def __getitem__(self, i):
         return self.graphsA[i], self.graphsB[i], self.labels[i]

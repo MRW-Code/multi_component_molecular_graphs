@@ -23,7 +23,6 @@ if __name__ == '__main__':
     for epoch in range(epochs):
         ls = []
         for batch_id, batch_data in enumerate(dataloader):
-            batch_data
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
 
@@ -31,7 +30,7 @@ if __name__ == '__main__':
             batched_graphB.to(device)
             labels.to(device)
 
-            feats = batched_graphA.ndata['atomic'].to(device)
+            feats = batched_graphA.ndata['atomic']
             logits = model(batched_graphA, feats)
             loss = F.mse_loss(logits, labels)
             ls.append(loss.item())

@@ -1,26 +1,29 @@
 from src.utils import args
-from src.dataset import MultiCompSolDataset , MultiCompSolDatasetv2
+from src.dataset import MultiCompSolDatasetv2
 from dgl.dataloading import GraphDataLoader
-from src.model import *
+from src.model import GATNet_1
 import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
 from dgl.data import DGLDataset
 from dgl.dataloading import batch_graphs
 from tqdm import tqdm
 import numpy as np
+import torch.nn.functional as F
+import torch
 
 if __name__ == '__main__':
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=10, shuffle=False)
 
     model = GATNet_1(1)
-    opt = torch.optim.Adam(model.parameters(), lr=0.01)
-    epochs = 10
+    opt = torch.optim.Adam(model.parameters(), lr=0.00001)
+    epochs = 20
 
     for epoch in range(epochs):
         ls = []
         for batch_id, batch_data in enumerate(dataloader):
             batched_graphA, batched_graphB, labels = batch_data
+            labels = labels.reshape(-1, 1)
 
             feats = batched_graphA.ndata['atomic']
             logits = model(batched_graphA, feats)

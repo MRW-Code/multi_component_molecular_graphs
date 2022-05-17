@@ -51,7 +51,8 @@ class MultiCompSolDatasetv2(dgl.data.DGLDataset):
             self.graphsB.append(graphB.to(device))
 
             # Get labels
-            self.labels.append(label.to(device))
+            self.labels.append(label)
+        self.labels = torch.tensor(self.labels, device=device)
 
     def __getitem__(self, i):
         return self.graphsA[i], self.graphsB[i], self.labels[i]

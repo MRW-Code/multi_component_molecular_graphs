@@ -11,15 +11,16 @@ import numpy as np
 import torch.nn.functional as F
 import torch
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
+import warnings
 
 if __name__ == '__main__':
     print(device)
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=True)
 
-    model = DoubleNet(1, 128)
+    model = DoubleNet(1, 256)
 
-    opt = torch.optim.Adam(model.parameters(), lr=0.00001)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-5)
     epochs = 500
     model.to(device)
     for epoch in range(epochs):

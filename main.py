@@ -86,7 +86,7 @@ if __name__ == '__main__':
             # torch.save(model.state_dict(), './checkpoints/models/best_model.pth')
             torch.save(model, './checkpoints/models/best_model.pth')
 
-        if min_valid_loss - valid_loss > 0.1
+        if min_valid_loss - valid_loss > 0.1:
             counter = 0
         else:
             counter =+ 1

@@ -79,6 +79,13 @@ if __name__ == '__main__':
             valid_loss += loss.item()
 
         print(f'Epoch {epoch + 1} \t Training Loss: {train_loss / len(train_dataloader)} \t Validation Loss: {valid_loss / len(val_dataloader)}')
+
+        if min_valid_loss - valid_loss < 0.1:
+            counter = 0
+        else:
+            counter += 1
+        print(min_valid_loss, valid_loss, min_valid_loss - valid_loss, counter)
+
         if min_valid_loss > valid_loss:
             print(f'Validation Loss Decreased({min_valid_loss:.6f}--->{valid_loss:.6f}) \t Saving The Model')
             min_valid_loss = valid_loss
@@ -86,13 +93,10 @@ if __name__ == '__main__':
             # torch.save(model.state_dict(), './checkpoints/models/best_model.pth')
             torch.save(model, './checkpoints/models/best_model.pth')
 
-        if min_valid_loss - valid_loss > 0.1:
-            counter = 0
-        else:
-            counter =+ 1
-
         # Early stopping
-        if counter >= 10: break
+        if counter >= 10:
+            print('No imporvement in 10 epochs, early stopping triggered')
+            break
 
         scheduler.step(valid_loss)
 

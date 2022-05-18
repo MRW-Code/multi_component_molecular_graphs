@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     # Get model and stuff for training
     model = DoubleNet(1, 1024)
-    opt = torch.optim.Adam(model.parameters(), lr=1e-7)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-4)
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=5, verbose=True)
 
     criterion = torch.nn.MSELoss()

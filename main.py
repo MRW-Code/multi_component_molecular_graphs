@@ -81,9 +81,9 @@ if __name__ == '__main__':
         print(f'Epoch {epoch + 1} \t Training Loss: {train_loss / len(train_dataloader)} \t Validation Loss: {valid_loss / len(val_dataloader)}')
 
         if min_valid_loss - valid_loss < 0.1:
-            counter = 0
-        else:
             counter += 1
+        else:
+            counter = 0
         print(min_valid_loss, valid_loss, min_valid_loss - valid_loss, counter)
 
         if min_valid_loss > valid_loss:

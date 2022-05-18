@@ -16,6 +16,7 @@ from dgllife.utils.splitters import SingleTaskStratifiedSplitter
 import os
 
 
+
 if __name__ == '__main__':
     os.makedirs('./checkpoints/models', exist_ok=True)
 
@@ -37,10 +38,10 @@ if __name__ == '__main__':
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=5, verbose=True)
 
     criterion = torch.nn.MSELoss()
-    epochs = 100
+    epochs = 1000
     model.to(device)
     min_valid_loss = np.inf
-
+    counter = 0
     # Training loop
     for epoch in range(epochs):
         train_loss = 0.0
@@ -83,8 +84,14 @@ if __name__ == '__main__':
             # Saving State Dict
             # torch.save(model.state_dict(), './checkpoints/models/best_model.pth')
             torch.save(model, './checkpoints/models/best_model.pth')
+            counter = 0
+        else:
+            counter =+ 1
+        counter = 10
+        if counter >= 10: break
 
         scheduler.step(valid_loss)
+
 
     model = torch.load('./checkpoints/models/best_model.pth')
     model.eval()

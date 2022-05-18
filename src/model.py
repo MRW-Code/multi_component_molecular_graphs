@@ -25,9 +25,31 @@ class GATNet_1(nn.Module):
         x = self.linear1A(x)
         x = self.relu(x)
         x = self.pooling(bg, x)
-        x = self.output1A(x)
-        return x.double()
+        return x
+        # x = self.output1A(x)
+        # return x.double()
 
 
+class DoubleNet(nn.Module):
+
+    def __init__(self, n_feats, emb_size):
+        super(DoubleNet, self).__init__()
+        self.gat1 = GATNet_1(n_feats)
+        self.gat2 = GATNet_1(n_feats)
+        self.pooling = dglnn.AvgPooling()
+        self.output = nn.Linear(emb_size*2, 1)
+
+
+
+
+    def forward(self, bgA, featsA, bgB, featsB):
+        x = self.gat1(bgA, featsA)
+        y = self.gat2(bgB, featsB)
+
+        cat_feats = torch.cat([x, y], axis=1)
+        # cat_graphs = dgl.batch([bgA, bgB])
+        # cat_feats = self.pooling(cat_graphs, cat_feats)
+        z = self.output(cat_feats)
+        return z.double()
 
 

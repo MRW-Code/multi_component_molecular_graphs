@@ -1,7 +1,7 @@
 from src.utils import args, device
 from src.dataset import MultiCompSolDatasetv2
 from dgl.dataloading import GraphDataLoader
-from src.model import GATNet_1
+from src.model import GATNet_1, DoubleNet
 import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
 from dgl.data import DGLDataset
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=False)
 
-    model = GATNet_1(1)
+    model = DoubleNet(1, 1024)
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 500
@@ -27,9 +27,11 @@ if __name__ == '__main__':
         for batch_id, batch_data in enumerate(dataloader):
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
-            feats = batched_graphA.ndata['atomic']
 
-            logits = model(batched_graphA, feats)
+            featsA = batched_graphA.ndata['atomic']
+            featsB = batched_graphB.ndata['atomic']
+
+            logits = model(batched_graphA, featsA, batched_graphB, featsB)
             loss = F.mse_loss(logits, labels)
             ls.append(loss.item())
 

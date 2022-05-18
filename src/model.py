@@ -8,9 +8,9 @@ import pytorch_lightning as pl
 import dgl.nn.pytorch as dglnn
 
 class GATNet_1(nn.Module):
-    def __init__(self, n_feats):
+    def __init__(self, n_feats, embedding_size):
         super(GATNet_1, self).__init__()
-        self.embedding_size = 1024
+        self.embedding_size = embedding_size
 
         # Layers
         self.gat1A = dglnn.GATConv(n_feats, self.embedding_size, num_heads=3)
@@ -34,13 +34,10 @@ class DoubleNet(nn.Module):
 
     def __init__(self, n_feats, emb_size):
         super(DoubleNet, self).__init__()
-        self.gat1 = GATNet_1(n_feats)
-        self.gat2 = GATNet_1(n_feats)
+        self.gat1 = GATNet_1(n_feats, emb_size)
+        self.gat2 = GATNet_1(n_feats, emb_size)
         self.pooling = dglnn.AvgPooling()
         self.output = nn.Linear(emb_size*2, 1)
-
-
-
 
     def forward(self, bgA, featsA, bgB, featsB):
         x = self.gat1(bgA, featsA)

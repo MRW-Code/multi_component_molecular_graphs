@@ -17,7 +17,7 @@ if __name__ == '__main__':
     dataset = MultiCompSolDatasetv2()
     dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=False)
 
-    model = DoubleNet(1, 1024)
+    model = DoubleNet(1, 512)
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 500

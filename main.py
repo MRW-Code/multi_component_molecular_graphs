@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     model = DoubleNet(1, 256)
 
-    opt = torch.optim.Adam(model.parameters(), lr=1e-5)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-7)
     epochs = 500
     model.to(device)
     for epoch in range(epochs):

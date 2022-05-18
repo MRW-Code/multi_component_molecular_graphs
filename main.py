@@ -15,9 +15,9 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, m
 if __name__ == '__main__':
     print(device)
     dataset = MultiCompSolDatasetv2()
-    dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=False)
+    dataloader = GraphDataLoader(dataset, batch_size=256, shuffle=True)
 
-    model = DoubleNet(1, 512)
+    model = DoubleNet(1, 128)
 
     opt = torch.optim.Adam(model.parameters(), lr=0.00001)
     epochs = 500

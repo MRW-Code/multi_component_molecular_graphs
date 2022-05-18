@@ -38,7 +38,7 @@ if __name__ == '__main__':
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=5, verbose=True)
 
     criterion = torch.nn.MSELoss()
-    epochs = 1000
+    epochs = 10000
     model.to(device)
     min_valid_loss = np.inf
     counter = 0
@@ -87,7 +87,7 @@ if __name__ == '__main__':
             counter = 0
         else:
             counter =+ 1
-        counter = 10
+        # Early stopping
         if counter >= 10: break
 
         scheduler.step(valid_loss)

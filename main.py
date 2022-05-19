@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # opt = torch.optim.Adam(model.parameters(), lr=1e-4)
     opt = torch.optim.SGD(model.parameters(), lr=1e-4)
 
-    scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=5, threshold=0.1,
+    scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=10, threshold=0.1,
                                   threshold_mode='rel',  verbose=True)
     criterion = torch.nn.MSELoss()
     epochs = 10000
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             torch.save(model, './checkpoints/models/best_model.pth')
 
         # Early stopping
-        if counter >= 10:
+        if counter >= 20:
             print('No imporvement in 10 epochs, early stopping triggered')
             break
 

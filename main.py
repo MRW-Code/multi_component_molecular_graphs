@@ -16,7 +16,6 @@ from dgllife.utils.splitters import SingleTaskStratifiedSplitter
 import os
 
 
-
 if __name__ == '__main__':
     os.makedirs('./checkpoints/models', exist_ok=True)
 
@@ -34,10 +33,11 @@ if __name__ == '__main__':
 
     # Get model and stuff for training
     model = DoubleNet(1, 1024)
-    opt = torch.optim.Adam(model.parameters(), lr=1e-4)
+    # opt = torch.optim.Adam(model.parameters(), lr=1e-4)
+    opt = torch.optim.SGD(model.parameters(), lr=1e-4)
+
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=5, threshold=0.1,
                                   threshold_mode='rel',  verbose=True)
-
     criterion = torch.nn.MSELoss()
     epochs = 10000
     model.to(device)
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             counter += 1
         else:
             counter = 0
-        print(min_valid_loss, valid_loss, min_valid_loss - valid_loss, counter)
+        # print(min_valid_loss, valid_loss, min_valid_loss - valid_loss, counter)
 
         if min_valid_loss > valid_loss:
             print(f'Validation Loss Decreased({min_valid_loss:.6f}--->{valid_loss:.6f}) \t Saving The Model')

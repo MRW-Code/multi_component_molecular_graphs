@@ -19,7 +19,7 @@ class GATNet_1(nn.Module):
         self.relu = nn.LeakyReLU(True)
         self.pooling = dglnn.AvgPooling()
 
-        self.gatn = dglnn.GATConv(self.embedding_size, self.embedding_size, num_heads=3)
+        self.gatn = dglnn.GATConv(self.embedding_size, self.embedding_size, num_heads=3, feat_drop=0.3)
 
     def forward(self, bg, feats):
         x = self.gat1A(bg, feats)

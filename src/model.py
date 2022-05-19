@@ -13,7 +13,7 @@ class GATNet_1(nn.Module):
         self.embedding_size = embedding_size
 
         # Layers
-        self.gat1A = dglnn.GATConv(n_feats, self.embedding_size, num_heads=3)
+        self.gat1A = dglnn.GATConv(n_feats, self.embedding_size, num_heads=3, feat_drop=0.3)
         self.linear1A = nn.Linear(self.embedding_size*3, self.embedding_size)
         self.output1A = nn.Linear(self.embedding_size, 1)
         self.relu = nn.LeakyReLU(True)

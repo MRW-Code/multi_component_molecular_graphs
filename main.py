@@ -27,12 +27,12 @@ if __name__ == '__main__':
     train_dataset, val_dataset, test_dataset = SingleTaskStratifiedSplitter.train_val_test_split(dataset, dataset.labels.reshape(-1, 1), 0)
 
     # Create dataloaders for each split
-    train_dataloader = GraphDataLoader(train_dataset, batch_size=256, shuffle=True)
-    val_dataloader = GraphDataLoader(val_dataset, batch_size=256, shuffle=True)
+    train_dataloader = GraphDataLoader(train_dataset, batch_size=64, shuffle=True)
+    val_dataloader = GraphDataLoader(val_dataset, batch_size=64, shuffle=True)
     test_dataloader = GraphDataLoader(test_dataset, batch_size=1, shuffle=True)
 
     # Get model and stuff for training
-    model = DoubleNet(1, 1024)
+    model = DoubleNet(1, 512)
     # opt = torch.optim.Adam(model.parameters(), lr=1e-4)
     opt = torch.optim.SGD(model.parameters(), lr=1e-4)
 

@@ -1,7 +1,7 @@
 from src.utils import args, device
-from src.dataset import MultiCompSolDatasetv2, MultiCompSolDatasetv3
+from src.dataset import *
 from dgl.dataloading import GraphDataLoader
-from src.model import GATNet_1, DoubleNet
+from src.model import *
 import pytorch_lightning as pl
 from torch_geometric.loader import DataLoader
 from dgl.data import DGLDataset
@@ -11,7 +11,8 @@ import numpy as np
 import torch.nn.functional as F
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error,\
+    mean_absolute_percentage_error, accuracy_score
 from dgllife.utils.splitters import SingleTaskStratifiedSplitter
 import os
 
@@ -20,7 +21,8 @@ if __name__ == '__main__':
     os.makedirs('./checkpoints/models', exist_ok=True)
 
     # Load dataset
-    dataset = MultiCompSolDatasetv3(use_one_hot=True)
+    # dataset = MultiCompSolDatasetv3(use_one_hot=True)
+    dataset = CCDataset(use_one_hot=True)
 
     # Split dataset into train/val/test
     # There is also a kfold function here which might be helpful at some point
@@ -31,17 +33,22 @@ if __name__ == '__main__':
     val_dataloader = GraphDataLoader(val_dataset, batch_size=64, shuffle=True)
     test_dataloader = GraphDataLoader(test_dataset, batch_size=1, shuffle=True)
 
-    feat_input_size = dataset.graphsA[0].ndata['atomic'].shape[1]
+    n_feats = dataset.graphsA[0].ndata['atomic'].shape[1]
+    e_feats = dataset.graphsA[0].edata['bond'].shape[1]
 
     # Get model and stuff for training
-    model = DoubleNet(n_feats=feat_input_size, emb_size=512)
+    model = DoubleNetBoth(n_feats=n_feats, e_feats=e_feats, emb_size=512, num_heads=3)
     opt = torch.optim.Adam(model.parameters(), lr=1e-4)
     # opt = torch.optim.SGD(model.parameters(), lr=1e-5, momentum=0.9)
 
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=10, threshold=0.1,
                                   threshold_mode='rel',  verbose=True)
-    criterion = torch.nn.MSELoss()
-    epochs = 10000
+
+
+    # criterion = torch.nn.MSELoss()
+    criterion = torch.nn.BCELoss()
+
+    epochs = 5
     model.to(device)
     min_valid_loss = np.inf
     counter = 0
@@ -53,13 +60,14 @@ if __name__ == '__main__':
             # Get labels and features
             batched_graphA, batched_graphB, labels = batch_data
             labels = labels.reshape(-1, 1)
-            featsA = batched_graphA.ndata['atomic']
-            featsB = batched_graphB.ndata['atomic']
+            # featsA = batched_graphA.ndata['atomic']
+            # featsB = batched_graphB.ndata['atomic']
 
             # Get preds
             opt.zero_grad()
-            logits = model(batched_graphA, featsA, batched_graphB, featsB)
-            loss = criterion(logits, labels)
+            # logits = model(batched_graphA, featsA, batched_graphB, featsB)
+            logits = model(batched_graphA, batched_graphB)
+            loss = criterion(logits.float(), labels.float())
 
             # backwards pass
             loss.backward()
@@ -76,8 +84,9 @@ if __name__ == '__main__':
             featsA = batched_graphA.ndata['atomic']
             featsB = batched_graphB.ndata['atomic']
 
-            target = model(batched_graphA, featsA, batched_graphB, featsB)
-            loss = criterion(target, labels)
+            # target = model(batched_graphA, featsA, batched_graphB, featsB)
+            target = model(batched_graphA, batched_graphB)
+            loss = criterion(target.float(), labels.float())
             valid_loss += loss.item()
 
         print(f'Epoch {epoch + 1} \t Training Loss: {train_loss / len(train_dataloader)} \t Validation Loss: {valid_loss / len(val_dataloader)}')
@@ -114,7 +123,8 @@ if __name__ == '__main__':
         featsA = batched_graphA.ndata['atomic']
         featsB = batched_graphB.ndata['atomic']
 
-        preds = model(batched_graphA, featsA, batched_graphB, featsB)
+        # preds = model(batched_graphA, featsA, batched_graphB, featsB)
+        preds = model(batched_graphA, batched_graphB)
 
         # metrics
         if torch.cuda.is_available():
@@ -124,9 +134,14 @@ if __name__ == '__main__':
             all_labels[batch_id] = labels.detach().numpy()
             all_preds[batch_id] = preds.detach().numpy()
 
-    r2 = r2_score(all_labels, all_preds)
-    mse = mean_squared_error(all_labels, all_preds)
-    mae = mean_absolute_error(all_labels, all_preds)
-    mape = mean_absolute_percentage_error(all_labels, all_preds)
+    # r2 = r2_score(all_labels, all_preds)
+    # mse = mean_squared_error(all_labels, all_preds)
+    # mae = mean_absolute_error(all_labels, all_preds)
+    # mape = mean_absolute_percentage_error(all_labels, all_preds)
+    # print('External test set:')
+    # print(f' r2={r2:.3f}, mse={mse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+    acc = accuracy_score(all_labels, all_preds)
     print('External test set:')
-    print(f' r2={r2:.3f}, mse={mse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+    print(f' acc ={acc:.3f}')
+
+

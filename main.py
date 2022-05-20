@@ -1,5 +1,5 @@
 from src.utils import args, device
-from src.dataset import MultiCompSolDatasetv2
+from src.dataset import MultiCompSolDatasetv2, MultiCompSolDatasetv3
 from dgl.dataloading import GraphDataLoader
 from src.model import GATNet_1, DoubleNet
 import pytorch_lightning as pl
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     os.makedirs('./checkpoints/models', exist_ok=True)
 
     # Load dataset
-    dataset = MultiCompSolDatasetv2()
+    dataset = MultiCompSolDatasetv3(use_one_hot=True)
 
     # Split dataset into train/val/test
     # There is also a kfold function here which might be helpful at some point
@@ -31,8 +31,10 @@ if __name__ == '__main__':
     val_dataloader = GraphDataLoader(val_dataset, batch_size=64, shuffle=True)
     test_dataloader = GraphDataLoader(test_dataset, batch_size=1, shuffle=True)
 
+    feat_input_size = dataset.graphsA[0].ndata['atomic'].shape[1]
+
     # Get model and stuff for training
-    model = DoubleNet(1, 512)
+    model = DoubleNet(n_feats=feat_input_size, emb_size=512)
     opt = torch.optim.Adam(model.parameters(), lr=1e-4)
     # opt = torch.optim.SGD(model.parameters(), lr=1e-5, momentum=0.9)
 

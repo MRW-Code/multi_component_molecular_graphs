@@ -158,7 +158,8 @@ class DoubleNetBoth(nn.Module):
         self.output = nn.Sequential(nn.Linear(emb_size*2, emb_size),
                                     nn.LeakyReLU(),
                                     nn.Dropout(0.5),
-                                    nn.Linear(emb_size, 2))
+                                    nn.Linear(emb_size, 1))
+        self.sig = nn.Sigmoid()
 
     def forward(self, bgA, bgB):
 
@@ -187,5 +188,5 @@ class DoubleNetBoth(nn.Module):
         # Cat
         z = torch.cat([x, y], axis=1)
         z = self.output(z)
-        # return z.double()
-        return z
+        return z.double()
+        # return self.sig(z)

@@ -19,7 +19,7 @@ import mlflow
 
 
 if __name__ == '__main__':
-    emb_size = 1024
+    emb_size = 4096
     num_heads = 3     # 6
     lr = 1e-4           # usual 1e-3
     bs = 32
@@ -37,7 +37,8 @@ if __name__ == '__main__':
                                                           0,
                                                           frac_train=0.8,
                                                           frac_val=0.1,
-                                                          frac_test=0.1)
+                                                          frac_test=0.1,
+                                                          random_state=0)
 
     # Create dataloaders for each split
     train_dataloader = GraphDataLoader(train_dataset, batch_size=bs, shuffle=True)
@@ -180,6 +181,12 @@ if __name__ == '__main__':
     mape = mean_absolute_percentage_error(all_labels, all_preds)
     print('External test set:')
     print(f' r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+
+    mlflow.log_metric('test_r2', value=float(r2), step=epoch)
+    mlflow.log_metric('test_rmse', value=float(rmse), step=epoch)
+    mlflow.log_metric('test_mae', value=float(mae), step=epoch)
+    mlflow.log_metric('test_mape', value=float(mape), step=epoch)
+
     # acc = accuracy_score(all_labels, all_preds)
     # print('External test set:')
     # print(f' acc ={acc:.3f}')

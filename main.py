@@ -19,8 +19,8 @@ import mlflow
 
 
 if __name__ == '__main__':
-    emb_size = 4096
-    num_heads = 3     # 6
+    emb_size = 1024
+    num_heads = 6    # 6
     lr = 1e-4           # usual 1e-3
     bs = 32
     os.makedirs('./checkpoints/models', exist_ok=True)

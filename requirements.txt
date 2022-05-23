@@ -25,3 +25,4 @@ torch-geometric
 tqdm
 sklearn
 matplotlib
+mlflow

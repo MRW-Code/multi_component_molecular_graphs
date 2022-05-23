@@ -24,3 +24,4 @@ torch-spline-conv
 torch-geometric
 tqdm
 sklearn
+torchviz

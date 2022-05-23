@@ -37,8 +37,8 @@ if __name__ == '__main__':
     e_feats = dataset.graphsA[0].edata['bond'].shape[1]
 
     # Get model and stuff for training
-    model = DoubleNetBoth(n_feats=n_feats, e_feats=e_feats, emb_size=512, num_heads=3)
-    opt = torch.optim.Adam(model.parameters(), lr=1e-11)
+    model = DoubleNetBoth(n_feats=n_feats, e_feats=e_feats, emb_size=1024, num_heads=3)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
     # opt = torch.optim.SGD(model.parameters(), lr=1e-5, momentum=0.9)
 
     scheduler = ReduceLROnPlateau(opt, mode='min', factor=0.1, patience=10, threshold=0.1,
@@ -48,10 +48,11 @@ if __name__ == '__main__':
     criterion = torch.nn.MSELoss()
     # criterion = torch.nn.BCELoss()
 
-    epochs = 2
+    epochs = 100
     model.to(device)
     min_valid_loss = np.inf
     counter = 0
+    min_rmse = 0.0
     # Training loop
     for epoch in range(epochs):
         train_loss = 0.0
@@ -74,7 +75,6 @@ if __name__ == '__main__':
 
 
         valid_loss = 0.0
-        max_mape = 0.0
         model.eval()
         all_targets = np.empty(len(test_dataloader))
         all_labels = np.empty(len(test_dataloader))
@@ -101,10 +101,9 @@ if __name__ == '__main__':
         mae = mean_absolute_error(all_labels, all_targets)
         mape = mean_absolute_percentage_error(all_labels, all_targets)
 
-        print(f' r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
-
         print(f'Epoch {epoch + 1} Training Loss: {train_loss / len(train_dataloader):.3f} Validation Loss: ' +\
               f'{valid_loss / len(val_dataloader):.3f} r2:{r2:.3f}, rmse:{rmse:.3f}, mape:{mape:.3f}')
+        print(f'\t Validation Metrics: r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
 
         if min_valid_loss - valid_loss < 0.1:
             counter += 1
@@ -112,18 +111,20 @@ if __name__ == '__main__':
             counter = 0
         # print(min_valid_loss, valid_loss, min_valid_loss - valid_loss, counter)
 
-        # if min_valid_loss > valid_loss:
-        if max_mape > mape:
+        if min_valid_loss > valid_loss:
+            min_valid_loss = valid_loss
+
+        if min_rmse > rmse or min_rmse == 0.0:
             print(f'Validation Loss Decreased({min_valid_loss:.6f}--->{valid_loss:.6f}) \t Saving The Model')
             # min_valid_loss = valid_loss
-            max_r2 = r2
+            min_rmse = rmse
             # Saving State Dict
             # torch.save(model.state_dict(), './checkpoints/models/best_model.pth')
             torch.save(model, './checkpoints/models/best_model.pth')
 
         # Early stopping
-        if counter >= 20:
-            print('No imporvement in 10 epochs, early stopping triggered')
+        if counter >= 10:
+            print('No improvement in 10 epochs, early stopping triggered')
             break
 
         scheduler.step(valid_loss)

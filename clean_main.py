@@ -71,9 +71,9 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     return model, optimizer, epoch, accuracy_list
 
 def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}/'
+    folder = f'checkpoints/{args.model}_2000/'
     os.makedirs(folder, exist_ok=True)
-    file_path = f'{folder}model_{split}.ckpt'
+    file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -91,27 +91,31 @@ def prediction_scores(all_labels, all_targets):
 if __name__ == '__main__':
     # HPARAMS
     N_SPLITS = 1
-    EMB_SIZE = 1024
-    NUM_HEADS = 6  # 6
-    lr = 1e-4  # usual 1e-3
-    bs = 32
+    EMB_SIZE = 512
+    NUM_HEADS = 3 # 6
+    lr = 1e-4 # usual 1e-3
+    bs = 16
 
     data_dict = get_datsets()
 
-    num_epochs = 5
+    num_epochs = 4000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):
-        model, optimizer, epoch, accuracy_list = load_model(args.model, i, 0.0001,
+        model, optimizer, epoch, accuracy_list = load_model(args.model, i, lr,
                                                             data_dict['n_feats'],
                                                             data_dict['e_feats'],
                                                             emb_size=EMB_SIZE,
                                                             num_heads=NUM_HEADS)
         # Training
+        lowest_loss = 100000000
         for e in tqdm(list(range(epoch + 1, epoch + num_epochs + 1)), ncols=80):
             loss = backprop(e, model, data_dict['train'], optimizer, training=True)
             accuracy_list.append(loss)
-        save_model(model, i, optimizer, e, accuracy_list)
+            if loss < lowest_loss:
+                print('new_best_model, saving!')
+                save_model(model, i, optimizer, e, accuracy_list)
+                lowest_loss = loss
 
         # Testing
         preds, topreds = backprop(0, model, data_dict['val'], optimizer, training=False)

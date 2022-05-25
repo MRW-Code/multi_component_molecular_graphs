@@ -141,20 +141,20 @@ class DNB(nn.Module):
         self.join_feats1A = InputInitializer(n_feats, e_feats)
         self.join_feats2A = EdgeGraphConv(n_feats+e_feats, n_feats+e_feats)
         self.gat1A = dglnn.GATConv(n_feats + e_feats, emb_size, num_heads=num_heads,
-                                   attn_drop=0.9, feat_drop=0.9, activation=nn.LeakyReLU())
+                                   attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
         self.linear1A = nn.Sequential(nn.Linear(emb_size*num_heads, emb_size),
-                                      nn.Dropout(0.9))
+                                      nn.Dropout(0.1))
         self.linear2A = nn.Sequential(nn.Linear(emb_size*2, emb_size),
-                                      nn.Dropout(0.9))
+                                      nn.Dropout(0.1))
 
         self.join_feats1B = InputInitializer(n_feats, e_feats)
         self.join_feats2B = EdgeGraphConv(n_feats + e_feats, n_feats + e_feats)
         self.gat1B = dglnn.GATConv(n_feats+e_feats, emb_size, num_heads=num_heads,
-                                   attn_drop=0.9, feat_drop=0.9, activation=nn.LeakyReLU())
+                                   attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
         self.linear1B = nn.Sequential(nn.Linear(emb_size*num_heads, emb_size),
-                                      nn.Dropout(0.9))
+                                      nn.Dropout(0.1))
         self.linear2B = nn.Sequential(nn.Linear(emb_size*2, emb_size),
-                                      nn.Dropout(0.9))
+                                      nn.Dropout(0.1))
 
 
         self.flatten = nn.Flatten(1)
@@ -162,7 +162,7 @@ class DNB(nn.Module):
 
         self.output = nn.Sequential(nn.Linear(emb_size*2, emb_size),
                                     nn.LeakyReLU(),
-                                    nn.Dropout(0.9),
+                                    nn.Dropout(0.1),
                                     nn.Linear(emb_size, 1))
         self.sig = nn.Sigmoid()
 

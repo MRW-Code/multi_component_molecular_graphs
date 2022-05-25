@@ -133,23 +133,28 @@ class WeightedSumAndMax(nn.Module):
         h_g = torch.cat([h_g_sum, h_g_max], dim=1)
         return h_g
 
-class DoubleNetBoth(nn.Module):
+class DNB(nn.Module):
 
     def __init__(self, n_feats, e_feats, emb_size, num_heads):
-        super(DoubleNetBoth, self).__init__()
+        super(DNB, self).__init__()
+        self.name = 'DNB'
         self.join_feats1A = InputInitializer(n_feats, e_feats)
         self.join_feats2A = EdgeGraphConv(n_feats+e_feats, n_feats+e_feats)
         self.gat1A = dglnn.GATConv(n_feats + e_feats, emb_size, num_heads=num_heads,
                                    attn_drop=0.9, feat_drop=0.9, activation=nn.LeakyReLU())
-        self.linear1A = nn.Linear(emb_size*num_heads, emb_size)
-        self.linear2A = nn.Linear(emb_size*2, emb_size)
+        self.linear1A = nn.Sequential(nn.Linear(emb_size*num_heads, emb_size),
+                                      nn.Dropout(0.9))
+        self.linear2A = nn.Sequential(nn.Linear(emb_size*2, emb_size),
+                                      nn.Dropout(0.9))
 
         self.join_feats1B = InputInitializer(n_feats, e_feats)
         self.join_feats2B = EdgeGraphConv(n_feats + e_feats, n_feats + e_feats)
         self.gat1B = dglnn.GATConv(n_feats+e_feats, emb_size, num_heads=num_heads,
                                    attn_drop=0.9, feat_drop=0.9, activation=nn.LeakyReLU())
-        self.linear1B = nn.Linear(emb_size*num_heads, emb_size)
-        self.linear2B = nn.Linear(emb_size*2, emb_size)
+        self.linear1B = nn.Sequential(nn.Linear(emb_size*num_heads, emb_size),
+                                      nn.Dropout(0.9))
+        self.linear2B = nn.Sequential(nn.Linear(emb_size*2, emb_size),
+                                      nn.Dropout(0.9))
 
 
         self.flatten = nn.Flatten(1)
@@ -157,15 +162,15 @@ class DoubleNetBoth(nn.Module):
 
         self.output = nn.Sequential(nn.Linear(emb_size*2, emb_size),
                                     nn.LeakyReLU(),
-                                    nn.Dropout(0.5),
+                                    nn.Dropout(0.9),
                                     nn.Linear(emb_size, 1))
         self.sig = nn.Sigmoid()
 
     def forward(self, bgA, bgB):
 
         # FOR GRAPH A
-        atom_featsA = bgA.ndata['atomic']
-        bond_featsA = bgA.edata['bond']
+        atom_featsA = bgA.ndata['atomic'].double()
+        bond_featsA = bgA.edata['bond'].double()
         x = self.join_feats1A(bgA, atom_featsA, bond_featsA)
         x = self.join_feats2A(bgA, x)
         x = self.gat1A(bgA, x)
@@ -175,8 +180,8 @@ class DoubleNetBoth(nn.Module):
         x = self.linear2A(x)
 
         # FOR GRAPH B
-        atom_featsB = bgB.ndata['atomic']
-        bond_featsB = bgB.edata['bond']
+        atom_featsB = bgB.ndata['atomic'].double()
+        bond_featsB = bgB.edata['bond'].double()
         y = self.join_feats1B(bgB, atom_featsB, bond_featsB)
         y = self.join_feats2B(bgB, y)
         y = self.gat1B(bgB, y)

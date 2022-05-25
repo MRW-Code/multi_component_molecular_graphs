@@ -57,7 +57,7 @@ if __name__ == '__main__':
     criterion = torch.nn.MSELoss()
     # criterion = torch.nn.BCELoss()
 
-    epochs = 10
+    epochs = 1
     model.to(device)
     min_valid_loss = np.inf
     counter = 0
@@ -73,15 +73,19 @@ if __name__ == '__main__':
         for epoch in range(epochs):
             train_loss = 0.0
             model.train()
+            all_targets = np.empty(len(test_dataloader))
+            all_labels = np.empty(len(test_dataloader))
             for batch_id, batch_data in enumerate(train_dataloader):
                 # Get labels and features
                 batched_graphA, batched_graphB, labels = batch_data
                 labels = labels.unsqueeze(1)
-
+                labels = torch.tensor(np.random.random_integers(0, 50, labels.shape[0])).unsqueeze(1).double()
                 # Get preds
                 opt.zero_grad()
                 # logits = model(batched_graphA, featsA, batched_graphB, featsB)
                 logits = model(batched_graphA, batched_graphB)
+                all_targets[batch_id] = logits
+                all_targets[batch_id] = labels
                 loss = criterion(logits, labels)
                 mlflow.log_metric('train_loss', value=float(loss), step=epoch)
                 # backwards pass
@@ -89,6 +93,15 @@ if __name__ == '__main__':
                 opt.step()
                 train_loss += loss.item()
 
+            r2 = r2_score(all_labels, all_targets)
+            rmse = mean_squared_error(all_labels, all_targets, squared=False)
+            mae = mean_absolute_error(all_labels, all_targets)
+            mape = mean_absolute_percentage_error(all_labels, all_targets)
+            print(f'\t Train Metrics: r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+            mlflow.log_metric('train_r2', value=float(r2), step=epoch)
+            mlflow.log_metric('train_rmse', value=float(rmse), step=epoch)
+            mlflow.log_metric('train_mae', value=float(mae), step=epoch)
+            mlflow.log_metric('train_mape', value=float(mape), step=epoch)
 
             valid_loss = 0.0
             model.eval()
@@ -113,18 +126,18 @@ if __name__ == '__main__':
                     all_labels[batch_id] = labels.detach().numpy()[batch_id]
                     all_targets[batch_id] = target.detach().numpy()[batch_id]
 
-            r2 = r2_score(all_labels, all_targets)
-            rmse = mean_squared_error(all_labels, all_targets, squared=False)
-            mae = mean_absolute_error(all_labels, all_targets)
-            mape = mean_absolute_percentage_error(all_labels, all_targets)
+            val_r2 = r2_score(all_labels, all_targets)
+            val_rmse = mean_squared_error(all_labels, all_targets, squared=False)
+            val_mae = mean_absolute_error(all_labels, all_targets)
+            val_mape = mean_absolute_percentage_error(all_labels, all_targets)
 
             print(f'Epoch {epoch + 1} Training Loss: {train_loss / len(train_dataloader):.3f} Validation Loss: ' +\
-                  f'{valid_loss / len(val_dataloader):.3f} r2:{r2:.3f}, rmse:{rmse:.3f}, mape:{mape:.3f}')
-            print(f'\t Validation Metrics: r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
-            mlflow.log_metric('val_r2', value=float(r2), step=epoch)
-            mlflow.log_metric('val_rmse', value=float(rmse), step=epoch)
-            mlflow.log_metric('val_mae', value=float(mae), step=epoch)
-            mlflow.log_metric('val_mape', value=float(mape), step=epoch)
+                  f'{valid_loss / len(val_dataloader):.3f} r2:{val_r2:.3f}, rmse:{val_rmse:.3f}, mape:{val_mape:.3f}')
+            # print(f'\t Validation Metrics: r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+            mlflow.log_metric('val_r2', value=float(val_r2), step=epoch)
+            mlflow.log_metric('val_rmse', value=float(val_rmse), step=epoch)
+            mlflow.log_metric('val_mae', value=float(val_mae), step=epoch)
+            mlflow.log_metric('val_mape', value=float(val_mape), step=epoch)
 
 
             if min_valid_loss - valid_loss < 0.1:
@@ -153,39 +166,39 @@ if __name__ == '__main__':
             scheduler.step(valid_loss)
 
 
-    model = torch.load('./checkpoints/models/best_model.pth')
-    model.eval()
-    all_preds = np.empty(len(test_dataloader))
-    all_labels = np.empty(len(test_dataloader))
-    for batch_id, batch_data in enumerate(test_dataloader):
-        # Get labels and features
-        batched_graphA, batched_graphB, labels = batch_data
-        labels = labels.unsqueeze(1)
-        featsA = batched_graphA.ndata['atomic']
-        featsB = batched_graphB.ndata['atomic']
-
-        # preds = model(batched_graphA, featsA, batched_graphB, featsB)
-        preds = model(batched_graphA, batched_graphB)
-
-        # metrics
-        if torch.cuda.is_available():
-            all_labels[batch_id] = labels.detach().cpu().numpy()
-            all_preds[batch_id] = preds.detach().cpu().numpy()
-        else:
-            all_labels[batch_id] = labels.detach().numpy()
-            all_preds[batch_id] = preds.detach().numpy()
-
-    r2 = r2_score(all_labels, all_preds)
-    rmse = mean_squared_error(all_labels, all_preds, squared=False)
-    mae = mean_absolute_error(all_labels, all_preds)
-    mape = mean_absolute_percentage_error(all_labels, all_preds)
-    print('External test set:')
-    print(f' r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
-
-    mlflow.log_metric('test_r2', value=float(r2), step=epoch)
-    mlflow.log_metric('test_rmse', value=float(rmse), step=epoch)
-    mlflow.log_metric('test_mae', value=float(mae), step=epoch)
-    mlflow.log_metric('test_mape', value=float(mape), step=epoch)
+    # model = torch.load('./checkpoints/models/best_model.pth')
+    # model.eval()
+    # all_preds = np.empty(len(test_dataloader))
+    # all_labels = np.empty(len(test_dataloader))
+    # for batch_id, batch_data in enumerate(test_dataloader):
+    #     # Get labels and features
+    #     batched_graphA, batched_graphB, labels = batch_data
+    #     labels = labels.unsqueeze(1)
+    #     featsA = batched_graphA.ndata['atomic']
+    #     featsB = batched_graphB.ndata['atomic']
+    #
+    #     # preds = model(batched_graphA, featsA, batched_graphB, featsB)
+    #     preds = model(batched_graphA, batched_graphB)
+    #
+    #     # metrics
+    #     if torch.cuda.is_available():
+    #         all_labels[batch_id] = labels.detach().cpu().numpy()
+    #         all_preds[batch_id] = preds.detach().cpu().numpy()
+    #     else:
+    #         all_labels[batch_id] = labels.detach().numpy()
+    #         all_preds[batch_id] = preds.detach().numpy()
+    #
+    # test_r2 = r2_score(all_labels, all_preds)
+    # test_rmse = mean_squared_error(all_labels, all_preds, squared=False)
+    # test_mae = mean_absolute_error(all_labels, all_preds)
+    # test_mape = mean_absolute_percentage_error(all_labels, all_preds)
+    # print('External test set:')
+    # print(f' r2={r2:.3f}, rmse={rmse:.3f}, mae={mae:.3f}, mape={mape:.3f}')
+    #
+    # mlflow.log_metric('test_r2', value=float(test_r2), step=epoch)
+    # mlflow.log_metric('test_rmse', value=float(test_rmse), step=epoch)
+    # mlflow.log_metric('test_mae', value=float(test_mae), step=epoch)
+    # mlflow.log_metric('test_mape', value=float(test_mape), step=epoch)
 
     # acc = accuracy_score(all_labels, all_preds)
     # print('External test set:')

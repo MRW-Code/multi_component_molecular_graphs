@@ -16,7 +16,7 @@ import torch.nn as nn
 import gc
 from tabulate import tabulate
 
-def get_datsets():
+def get_datsets(bs):
     os.makedirs('./checkpoints/models', exist_ok=True)
     dataset = MultiCompSolDatasetv3(use_one_hot=True)
     train_dataset, val_dataset, test_dataset = \
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     lr = 1e-4 # usual 1e-3
     bs = 16
 
-    data_dict = get_datsets()
+    data_dict = get_datsets(bs)
 
     num_epochs = 4000
     allpreds, alltopreds = [], []

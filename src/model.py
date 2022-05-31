@@ -195,3 +195,94 @@ class DNB(nn.Module):
         z = self.output(z)
         return z.double()
         # return self.sig(z)
+
+class DNBDeep(nn.Module):
+
+    def __init__(self, n_feats, e_feats, emb_size, num_heads):
+        super(DNBDeep, self).__init__()
+        self.name = 'DNBDeep'
+        # For molecules
+        self.join_features1A = InputInitializer(n_feats, e_feats)
+        self.join_features2A = EdgeGraphConv(n_feats + e_feats, n_feats + e_feats)
+        self.gat1A = dglnn.GATConv(n_feats + e_feats, emb_size, num_heads=num_heads,
+                                                 attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear1A = nn.Sequential(nn.Flatten(1),
+                        nn.Linear(emb_size * num_heads, emb_size),
+                        nn.Dropout(0.1))
+        self.gat2A = dglnn.GATConv(emb_size, emb_size, num_heads=num_heads,
+                                                 attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear2A = nn.Sequential(nn.Flatten(1),
+                        nn.Linear(emb_size * num_heads, emb_size),
+                        nn.Dropout(0.1))
+        self.graph_poolA = WeightedSumAndMax(emb_size)
+        self.pool_linearA = nn.Sequential(nn.Linear(emb_size * 2, emb_size),
+                                         nn.Dropout(0.1))
+
+        # For solvents
+        self.join_features1B = InputInitializer(n_feats, e_feats)
+        self.join_features2B = EdgeGraphConv(n_feats + e_feats, n_feats + e_feats)
+        self.gat1B = dglnn.GATConv(n_feats + e_feats, emb_size, num_heads=num_heads,
+                                                 attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear1B = nn.Sequential(nn.Flatten(1),
+                        nn.Linear(emb_size * num_heads, emb_size),
+                        nn.Dropout(0.1))
+        self.gat2B = dglnn.GATConv(emb_size, emb_size, num_heads=num_heads,
+                                                 attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear2B = nn.Sequential(nn.Flatten(1),
+                        nn.Linear(emb_size * num_heads, emb_size),
+                        nn.Dropout(0.1))
+        self.graph_poolB = WeightedSumAndMax(emb_size)
+        self.pool_linearB = nn.Sequential(nn.Linear(emb_size * 2, emb_size),
+                                         nn.Dropout(0.1))
+
+        # For joined / both molecule and solvent details
+
+        self.output = nn.Sequential(nn.Linear(emb_size*2, emb_size),
+                                    nn.LeakyReLU(),
+                                    nn.Dropout(0.1),
+                                    nn.Linear(emb_size, 1))
+
+
+    def forward(self, bgA, bgB):
+        #################
+        # FOR molecules #
+        #################
+        atom_featsA = bgA.ndata['atomic'].double()
+        bond_featsA = bgA.edata['bond'].double()
+        x = self.join_features1A(bgA, atom_featsA, bond_featsA)
+        x = self.join_features2A(bgA, x)
+        x = self.gat1A(bgA, x)
+        x = self.linear1A(x)
+
+        # Add a second GAT layer
+        x = self.gat2A(bgA, x)
+        x = self.linear2A(x)
+
+        # Prep molecules for concat
+        x = self.graph_poolA(bgA, x)
+        x = self.pool_linearA(x)
+
+        #################
+        # FOR Solvents #
+        #################
+        atom_featsB = bgB.ndata['atomic'].double()
+        bond_featsB = bgB.edata['bond'].double()
+        y = self.join_features1B(bgB, atom_featsB, bond_featsB)
+        y = self.join_features2B(bgB, y)
+        y = self.gat1B(bgB, y)
+        y = self.linear1B(y)
+
+        # Add a second GAT layer
+        y = self.gat2B(bgB, y)
+        y = self.linear2B(y)
+
+        # Prep molecules for concat
+        y = self.graph_poolB(bgB, y)
+        y = self.pool_linearB(y)
+
+        ##########
+        # Concat #
+        ##########
+        z = torch.cat([x, y], axis=1)
+        z = self.output(z)
+        return z.double()

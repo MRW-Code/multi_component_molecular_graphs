@@ -108,7 +108,7 @@ if __name__ == '__main__':
                                                             emb_size=EMB_SIZE,
                                                             num_heads=NUM_HEADS)
         # Training
-        lowest_loss = 100000000
+        lowest_loss = np.inf
         for e in tqdm(list(range(epoch + 1, epoch + num_epochs + 1)), ncols=80):
             loss = backprop(e, model, data_dict['train'], optimizer, training=True)
             accuracy_list.append(loss)

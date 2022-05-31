@@ -5,8 +5,8 @@ import torch
 parser = argparse.ArgumentParser(usage='python main.py')
 parser.add_argument('--gpu_idx', action='store', dest='gpu_idx', default='0',
                   choices=['0', '1', '2', '3', '4', '5'])
-parser.add_argument('-m', '--model', action='store', dest='model', default='DNB',
-                  choices=['DNB'])
+parser.add_argument('-m', '--model', action='store', dest='model', default='DNBDeep',
+                  choices=['DNB', 'DNBDeep'])
 parser.add_argument('--cpu', action='store_true',
                   dest='cpu', default=False)
 args = parser.parse_args()

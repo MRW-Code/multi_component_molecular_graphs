@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     data_dict = get_datsets(bs)
 
-    model_paths = sorted([f'./checkpoints/DNBDeep_2000/{x}' for x in os.listdir('./checkpoints/DNBDeep_3_layers')])
+    model_paths = sorted([f'./checkpoints/DNBDeep_2_layers/{x}' for x in os.listdir('./checkpoints/DNBDeep_2_layers')])
     # model_r2 = np.zeros(len(model_paths))
     # model_rmse = np.zeros(len(model_paths))
     # model_mae = np.zeros(len(model_paths))

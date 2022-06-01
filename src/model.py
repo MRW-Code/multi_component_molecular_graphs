@@ -273,8 +273,8 @@ class DNBDeep(nn.Module):
         x = self.linear2A(x)
 
         # Add a 3rd GAT layer
-        x = self.gat3A(bgA, x)
-        x = self.linear3A(x)
+        # x = self.gat3A(bgA, x)
+        # x = self.linear3A(x)
 
         # Prep molecules for concat
         x = self.graph_poolA(bgA, x)
@@ -295,8 +295,8 @@ class DNBDeep(nn.Module):
         y = self.linear2B(y)
 
         # Add a 3rd GAT layer
-        y = self.gat3B(bgB, y)
-        y = self.linear3B(y)
+        # y = self.gat3B(bgB, y)
+        # y = self.linear3B(y)
 
         # Prep molecules for concat
         y = self.graph_poolB(bgB, y)

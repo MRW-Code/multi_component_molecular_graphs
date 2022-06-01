@@ -209,11 +209,19 @@ class DNBDeep(nn.Module):
         self.linear1A = nn.Sequential(nn.Flatten(1),
                         nn.Linear(emb_size * num_heads, emb_size),
                         nn.Dropout(0.1))
+
         self.gat2A = dglnn.GATConv(emb_size, emb_size, num_heads=num_heads,
                                                  attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
         self.linear2A = nn.Sequential(nn.Flatten(1),
                         nn.Linear(emb_size * num_heads, emb_size),
                         nn.Dropout(0.1))
+        self.gat3A = dglnn.GATConv(emb_size, emb_size, num_heads=num_heads,
+                                   attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear3A = nn.Sequential(nn.Flatten(1),
+                                      nn.Linear(emb_size * num_heads, emb_size),
+                                      nn.Dropout(0.1))
+
+
         self.graph_poolA = WeightedSumAndMax(emb_size)
         self.pool_linearA = nn.Sequential(nn.Linear(emb_size * 2, emb_size),
                                          nn.Dropout(0.1))
@@ -231,6 +239,12 @@ class DNBDeep(nn.Module):
         self.linear2B = nn.Sequential(nn.Flatten(1),
                         nn.Linear(emb_size * num_heads, emb_size),
                         nn.Dropout(0.1))
+        self.gat3B = dglnn.GATConv(emb_size, emb_size, num_heads=num_heads,
+                                   attn_drop=0, feat_drop=0, activation=nn.LeakyReLU())
+        self.linear3B = nn.Sequential(nn.Flatten(1),
+                                      nn.Linear(emb_size * num_heads, emb_size),
+                                      nn.Dropout(0.1))
+
         self.graph_poolB = WeightedSumAndMax(emb_size)
         self.pool_linearB = nn.Sequential(nn.Linear(emb_size * 2, emb_size),
                                          nn.Dropout(0.1))
@@ -258,6 +272,10 @@ class DNBDeep(nn.Module):
         x = self.gat2A(bgA, x)
         x = self.linear2A(x)
 
+        # Add a 3rd GAT layer
+        x = self.gat3A(bgA, x)
+        x = self.linear3A(x)
+
         # Prep molecules for concat
         x = self.graph_poolA(bgA, x)
         x = self.pool_linearA(x)
@@ -275,6 +293,10 @@ class DNBDeep(nn.Module):
         # Add a second GAT layer
         y = self.gat2B(bgB, y)
         y = self.linear2B(y)
+
+        # Add a 3rd GAT layer
+        y = self.gat3B(bgB, y)
+        y = self.linear3B(y)
 
         # Prep molecules for concat
         y = self.graph_poolB(bgB, y)

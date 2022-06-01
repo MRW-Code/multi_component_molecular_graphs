@@ -72,7 +72,7 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     return model, optimizer, epoch, accuracy_list
 
 def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}_3_layers/'
+    folder = f'checkpoints/{args.model}_2_layers/'
     os.makedirs(folder, exist_ok=True)
     file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({

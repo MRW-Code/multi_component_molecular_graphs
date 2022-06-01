@@ -108,24 +108,24 @@ if __name__ == '__main__':
                                                             data_dict['e_feats'],
                                                             emb_size=EMB_SIZE,
                                                             num_heads=NUM_HEADS)
-        # Training
-        lowest_loss = np.inf
-        for e in tqdm(list(range(epoch + 1, epoch + num_epochs + 1)), ncols=80):
-            loss = backprop(e, model, data_dict['train'], optimizer, training=True)
-            accuracy_list.append(loss)
-            if loss < lowest_loss:
-                print('new_best_model, saving!')
-                save_model(model, i, optimizer, e, accuracy_list)
-                lowest_loss = loss
-            if e % 500 == 0 and e != 0 and e % 1000 > 0:
-                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 2
-                print(f'new lr = {optimizer.param_groups[0]["lr"]}')
-
-            elif e % 500 == 0 and e != 0 and e % 1000 == 0:
-                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 5
-                print(f'new lr = {optimizer.param_groups[0]["lr"]}')
+        # # Training
+        # lowest_loss = np.inf
+        # for e in tqdm(list(range(epoch + 1, epoch + num_epochs + 1)), ncols=80):
+        #     loss = backprop(e, model, data_dict['train'], optimizer, training=True)
+        #     accuracy_list.append(loss)
+        #     if loss < lowest_loss:
+        #         print('new_best_model, saving!')
+        #         save_model(model, i, optimizer, e, accuracy_list)
+        #         lowest_loss = loss
+        #     if e % 500 == 0 and e != 0 and e % 1000 > 0:
+        #         print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
+        #         optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 2
+        #         print(f'new lr = {optimizer.param_groups[0]["lr"]}')
+        #
+        #     elif e % 500 == 0 and e != 0 and e % 1000 == 0:
+        #         print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
+        #         optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 5
+        #         print(f'new lr = {optimizer.param_groups[0]["lr"]}')
 
         # Testing
         print('loading best model')
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         epoch = checkpoint['epoch']
         accuracy_list = checkpoint['accuracy_list']
 
-        preds, topreds = backprop(0, model, data_dict['val'], optimizer, training=False)
+        preds, topreds = backprop(0, model, data_dict['train'], optimizer, training=False)
         allpreds.append(preds); alltopreds.append(topreds)
         table.append([i, lf(preds, topreds).item()])
 

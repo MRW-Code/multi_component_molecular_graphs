@@ -118,14 +118,14 @@ if __name__ == '__main__':
                 save_model(model, i, optimizer, e, accuracy_list)
                 lowest_loss = loss
             if e % 500 == 0 and e != 0 and e % 1000 > 0:
-                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]['lr']}')
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
-                print(f'new lr = {optimizer.param_groups[0]['lr']}')
+                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
+                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 2
+                print(f'new lr = {optimizer.param_groups[0]["lr"]}')
 
             elif e % 500 == 0 and e != 0 and e % 1000 == 0:
-                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]['lr']}')
+                print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
                 optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 5
-                print(f'new lr = {optimizer.param_groups[0]['lr']}')
+                print(f'new lr = {optimizer.param_groups[0]["lr"]}')
 
         # Testing
         print('loading best model')

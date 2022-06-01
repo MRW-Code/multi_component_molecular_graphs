@@ -116,6 +116,10 @@ if __name__ == '__main__':
                 print('new_best_model, saving!')
                 save_model(model, i, optimizer, e, accuracy_list)
                 lowest_loss = loss
+            if e % 1000 == 0 and e != 0:
+                print(f'Time to reduce lr, current lr = {lr}, new lr = {lr / 2}')
+                optimizer.defaults['lr'] = lr /2
+
 
         # Testing
         preds, topreds = backprop(0, model, data_dict['val'], optimizer, training=False)

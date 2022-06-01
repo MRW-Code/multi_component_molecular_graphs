@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     data_dict = get_datsets(bs)
 
-    num_epochs = 1
+    num_epochs = 4000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):
@@ -131,6 +131,7 @@ if __name__ == '__main__':
         print('loading best model')
         model_paths = [f'./checkpoints/{args.model}_3_layers/{x}' for x in os.listdir(f'checkpoints/{args.model}_3_layers')]
         best_path = natsorted(model_paths)[-1]
+        print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

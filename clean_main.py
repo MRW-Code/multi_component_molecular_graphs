@@ -96,11 +96,11 @@ if __name__ == '__main__':
     EMB_SIZE = 512
     NUM_HEADS = 3 # 6
     lr = 1e-4 # usual 1e-3
-    bs = 16
+    bs = 32 #16
 
     data_dict = get_datsets(bs)
 
-    num_epochs = 8000
+    num_epochs = 1000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):
@@ -118,10 +118,10 @@ if __name__ == '__main__':
             preds, val_loss = backprop(e, model, data_dict['val'], optimizer, training=False)
             val_acc.append(val_loss)
 
-            if loss[0] < lowest_loss:
+            if val_loss < lowest_loss:
                 print('new_best_model, saving!')
                 save_model(model, i, optimizer, e, accuracy_list)
-                lowest_loss = loss[0]
+                lowest_loss = val_loss
             if e == 4000:
                 print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
                 optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 10

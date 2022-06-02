@@ -11,11 +11,12 @@ from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error,\
     mean_absolute_percentage_error, accuracy_score
 from dgllife.utils.splitters import SingleTaskStratifiedSplitter
 import os
-import mlflow
+# import mlflow
 import torch.nn as nn
 import gc
 from tabulate import tabulate
 from natsort import natsorted
+import matplotlib.pyplot as plt
 
 def get_datsets(bs):
     os.makedirs('./checkpoints/models', exist_ok=True)
@@ -59,7 +60,7 @@ def backprop(epoch, model, dataloader, optimizer, training):
         preds.append(pred.detach().cpu());
         topreds.append(labels.detach().cpu())
     if training: tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(ls)}')
-    return np.mean(ls) if training else (torch.cat(preds), torch.cat(topreds))
+    return np.mean(ls) if training else (torch.cat(preds), torch.cat(topreds)), np.mean(ls)
 
 def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     import src.model
@@ -72,7 +73,7 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     return model, optimizer, epoch, accuracy_list
 
 def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}_2_layers/'
+    folder = f'checkpoints/{args.model}_2_layers_6000/'
     os.makedirs(folder, exist_ok=True)
     file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({
@@ -99,7 +100,7 @@ if __name__ == '__main__':
 
     data_dict = get_datsets(bs)
 
-    num_epochs = 4000
+    num_epochs = 8000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):
@@ -110,27 +111,41 @@ if __name__ == '__main__':
                                                             num_heads=NUM_HEADS)
         # Training
         lowest_loss = np.inf
+        val_acc = []
         for e in tqdm(list(range(epoch + 1, epoch + num_epochs + 1)), ncols=80):
             loss = backprop(e, model, data_dict['train'], optimizer, training=True)
-            accuracy_list.append(loss)
-            if loss < lowest_loss:
+            accuracy_list.append(loss[0])
+            preds, val_loss = backprop(e, model, data_dict['val'], optimizer, training=False)
+            val_acc.append(val_loss)
+
+            if loss[0] < lowest_loss:
                 print('new_best_model, saving!')
                 save_model(model, i, optimizer, e, accuracy_list)
-                lowest_loss = loss
-            if e % 500 == 0 and e != 0 and e % 1000 > 0:
+                lowest_loss = loss[0]
+            if e == 4000:
                 print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 2
+                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]["lr"] / 10
                 print(f'new lr = {optimizer.param_groups[0]["lr"]}')
 
-            elif e % 500 == 0 and e != 0 and e % 1000 == 0:
+            elif e == 6000:
                 print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 5
+                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 10
                 print(f'new lr = {optimizer.param_groups[0]["lr"]}')
+
+        # loss plot
+        x = np.arange(0, num_epochs)
+        plt.plot(x, accuracy_list, '-b', label='train_loss')
+        plt.plot(x, val_acc, '-r', label='val_loss')
+        plt.xlabel('epoch')
+        plt.ylabel('loss')
+        plt.legend(loc='upper left')
+        plt.savefig('loss_plot.png')
+        plt.show()
 
         # Testing
         print('loading best model')
-        model_paths = [f'./checkpoints/{args.model}_3_layers/{x}' for x in os.listdir(f'checkpoints/{args.model}_3_layers')]
-        best_path = natsorted(model_paths)[-1]
+        model_paths = [f'./checkpoints/{args.model}_2_layers_6000/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_6000')]
+        best_path = natsorted(model_paths)[-2]
         print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))
         model.load_state_dict(checkpoint['model_state_dict'])

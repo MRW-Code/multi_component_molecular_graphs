@@ -145,7 +145,7 @@ if __name__ == '__main__':
         # Testing
         print('loading best model')
         model_paths = [f'./checkpoints/{args.model}_2_layers_8000/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_8000')]
-        best_path = natsorted(model_paths)[-2]
+        best_path = natsorted(model_paths)[-1]
         print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -153,7 +153,7 @@ if __name__ == '__main__':
         epoch = checkpoint['epoch']
         accuracy_list = checkpoint['accuracy_list']
 
-        preds, topreds = backprop(0, model, data_dict['val'], optimizer, training=False)
+        preds, topreds = backprop(0, model, data_dict['val'], optimizer, training=False)[0]
         allpreds.append(preds); alltopreds.append(topreds)
         table.append([i, lf(preds, topreds).item()])
 

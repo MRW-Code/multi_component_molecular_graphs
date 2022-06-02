@@ -73,7 +73,7 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     return model, optimizer, epoch, accuracy_list
 
 def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}_2_layers_6000/'
+    folder = f'checkpoints/{args.model}_2_layers_8000/'
     os.makedirs(folder, exist_ok=True)
     file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
         # Testing
         print('loading best model')
-        model_paths = [f'./checkpoints/{args.model}_2_layers_6000/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_6000')]
+        model_paths = [f'./checkpoints/{args.model}_2_layers_8000/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_8000')]
         best_path = natsorted(model_paths)[-2]
         print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))

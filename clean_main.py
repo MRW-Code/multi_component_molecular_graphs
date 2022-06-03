@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     data_dict = get_datsets(bs)
 
-    num_epochs = 8000
+    num_epochs = 4000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):

@@ -96,11 +96,11 @@ if __name__ == '__main__':
     EMB_SIZE = 1024
     NUM_HEADS = 3 # 6
     lr = 1e-4 # usual 1e-3
-    bs = 16 #16
+    bs = 32 #16
 
     data_dict = get_datsets(bs)
 
-    num_epochs = 8000
+    num_epochs = 4000
     allpreds, alltopreds = [], []
     table = []; lf = nn.MSELoss(reduction = 'mean')
     for i in range(N_SPLITS):

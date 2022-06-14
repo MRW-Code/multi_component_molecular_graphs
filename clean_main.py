@@ -96,7 +96,7 @@ if __name__ == '__main__':
     EMB_SIZE = 2048
     NUM_HEADS = 3 # 6
     lr = 1e-4 # usual 1e-3
-    bs = 32 #16
+    bs = 64 #16
 
     data_dict = get_datsets(bs)
 

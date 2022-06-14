@@ -72,8 +72,8 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     accuracy_list = []
     return model, optimizer, epoch, accuracy_list
 
-def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}_2_layers_4000_2048_32/'
+def save_model(model, split, optimizer, epoch, accuracy_list, num_epochs, emb_size, bs):
+    folder = f'checkpoints/{args.model}_2_layers_{num_epochs}_{emb_size}_{bs}/'
     os.makedirs(folder, exist_ok=True)
     file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
             if val_loss < lowest_loss:
                 print('new_best_model, saving!')
-                save_model(model, i, optimizer, e, accuracy_list)
+                save_model(model, i, optimizer, e, accuracy_list, num_epochs, EMB_SIZE, bs)
                 lowest_loss = val_loss
             if e == 4000:
                 print(f'Time to reduce lr, current lr = {optimizer.param_groups[0]["lr"]}')
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
         # Testing
         print('loading best model')
-        model_paths = [f'./checkpoints/{args.model}_2_layers_4000_2048_32/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_4000_2048_32')]
+        model_paths = [f'./checkpoints/{args.model}_2_layers_{num_epochs}_{EMB_SIZE}_{bs}/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_{num_epochs}_{EMB_SIZE}_{bs}')]
         best_path = natsorted(model_paths)[-1]
         print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))

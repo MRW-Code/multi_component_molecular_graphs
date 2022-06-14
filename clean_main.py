@@ -73,7 +73,7 @@ def load_model(modelname, split_no, lr, n_feats, n_edges, emb_size, num_heads):
     return model, optimizer, epoch, accuracy_list
 
 def save_model(model, split, optimizer, epoch, accuracy_list):
-    folder = f'checkpoints/{args.model}_2_layers_4000_512/'
+    folder = f'checkpoints/{args.model}_2_layers_4000_2048_32/'
     os.makedirs(folder, exist_ok=True)
     file_path = f'{folder}model_{split}_{epoch}.ckpt'
     torch.save({
@@ -93,10 +93,10 @@ def prediction_scores(all_labels, all_targets):
 if __name__ == '__main__':
     # HPARAMS
     N_SPLITS = 1
-    EMB_SIZE = 512
+    EMB_SIZE = 2048
     NUM_HEADS = 3 # 6
     lr = 1e-4 # usual 1e-3
-    bs = 16 #16
+    bs = 32 #16
 
     data_dict = get_datsets(bs)
 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
         # Testing
         print('loading best model')
-        model_paths = [f'./checkpoints/{args.model}_2_layers_4000_512/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_4000_512')]
+        model_paths = [f'./checkpoints/{args.model}_2_layers_4000_2048_32/{x}' for x in os.listdir(f'checkpoints/{args.model}_2_layers_4000_2048_32')]
         best_path = natsorted(model_paths)[-1]
         print(best_path)
         checkpoint = torch.load(best_path, map_location=torch.device(device))

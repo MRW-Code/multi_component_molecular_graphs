@@ -71,7 +71,7 @@ class MultiCompSolDatasetv3(dgl.data.DGLDataset):
 
     def __init__(self, use_one_hot):
         self.use_one_hot = use_one_hot
-        super().__init__(name='multicompsoldatasetv3')
+        super().__init__(name='multicompsoldatasetv3', raw_dir='./.dgl', save_dir='./dataset_save')
 
 
     def featurize_atoms(self, mol):
